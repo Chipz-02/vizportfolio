@@ -1,20 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>My Observable Chart</title>
+  <meta charset="UTF-8">
+  <title># of Unique Words Used</title>
+  <style>
+    body {
+      background: #f6f6f6;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .frame {
+      width: 800px;
+      height: 450px;
+      outline: 1px solid black;
+      position: relative;
+      background: #EAEAEA;
+    }
+
+    .radio {
+      position: absolute;
+      top: 35px;
+      left: 500px;
+      z-index: 10;
+      font-size: 13px;
+      font-weight: bold;
+      display: flex;
+    }
+
+    .legend-footer {
+      position: absolute;
+      bottom: 10px;
+      left: 480px;
+      display: flex;
+      gap: 15px;
+      font-size: 10px;
+    }
+
+    .legend-footer .box {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      margin-right: 6px;
+    }
+
+    .legend-footer .item {
+      display: flex;
+      align-items: center;
+    }
+  </style>
 </head>
 <body>
-  <h1>Look at my chart! 🎉</h1>
-  <div id="chart"></div>
+
+  <h1># of Unique Words Used Within Artist’s First 35,000 Lyrics</h1>
+
+  <div class="frame">
+    <div id="choices" class="radio"></div>
+    <div id="chart"></div>
+    <div class="legend-footer">
+      <div class="item"><div class="box" style="background:#44b0fb;"></div>East Coast</div>
+      <div class="item"><div class="box" style="background:#e94953;"></div>West Coast</div>
+      <div class="item"><div class="box" style="background:#9694f7;"></div>Southern</div>
+      <div class="item"><div class="box" style="background:#8DF2AD;"></div>Midwest</div>
+    </div>
+  </div>
 
   <script type="module">
     import { Runtime, Inspector } from "https://cdn.jsdelivr.net/npm/@observablehq/runtime@5/dist/runtime.js";
     import define from "https://api.observablehq.com/d/120634d692da8f6f.js?v=4";
 
     new Runtime().module(define, name => {
+      if (name === "viewof choices") return new Inspector(document.getElementById("choices"));
       if (name === "chart") return new Inspector(document.getElementById("chart"));
     });
   </script>
+
 </body>
 </html>
