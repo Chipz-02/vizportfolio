@@ -1,8 +1,20 @@
-Hello this is MY FRKN PORTFOLIO
-</H2> SVG Inline edit </h2>
-<svg width="285" height="487" viewBox="0 0 285 487" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="285" height="487" fill="#D9D9D9"/>
-    <rect x="54" y="60" width="171" height="161" fill="#AAAAAA"/>
-    <ellipse cx="130.5" cy="368.5" rx="56.5" ry="57.5" fill="#330000"/>
-    </svg>
-    
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>My Observable Chart</title>
+</head>
+<body>
+  <h1>Look at my chart! 🎉</h1>
+  <div id="chart"></div>
+
+  <script type="module">
+    import { Runtime, Inspector } from "https://cdn.jsdelivr.net/npm/@observablehq/runtime@5/dist/runtime.js";
+    import define from "https://api.observablehq.com/d/120634d692da8f6f.js?v=4";
+
+    new Runtime().module(define, name => {
+      if (name === "chart") return new Inspector(document.getElementById("chart"));
+    });
+  </script>
+</body>
+</html>
