@@ -1,90 +1,1284 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title># of Unique Words Used</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>F1 Pole Position Analysis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {
-      background: #f6f6f6;
-      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #111;
+      color: #fff;
+      font-family: 'Titillium Web', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .intro-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin: 0;
-      padding: 25px;
+      text-align: center;
+      padding: 80px  20px;
+      max-width: 800px;
+      margin: 0 auto 10vh auto;
     }
 
-    h1 {
-      font-size: 30px;
+    .f1-logo {
+      width: 180px;
+      height: auto;
+      margin-bottom: 30px;
+    }
+
+    .intro-container h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin: 0 0 25px 0;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+    }
+
+    .subheading {
+      max-width: 580px;
+      margin: 0 auto 30px auto;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #c0c0c0;
+    }
+
+    .meta-info {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 50px;
+    }
+
+    .main-image {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 50px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .intro-text {
+      max-width: 600px;
+      text-align: left;
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: #e0e0e0;
+    }
+
+    .intro-text p {
+      margin-bottom: 1.5em;
+    }
+
+    .intro-text strong {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .container {
+      position: relative;
+      width: 100vw;
+      height: 350vh; /* Reduced height to minimize scroll gap */
+    }
+
+    .lines-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+      grid-template-columns: repeat(1150, 1fr);
+      width: 80vw;
+      height: 80px;
+      gap: 1px;
+      z-index: 1;
+      transition: opacity 0.2s ease; /* Faster fade-out */
+    }
+
+    .line {
+        border-radius: 2px;
+      width: 100%;
+      height: 100%;
+      background-color: transparent;
+      transition: background-color 0.3s ease;
+    }
+
+    .message {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      padding: 0 40px;
+      box-sizing: border-box;
+      z-index: 10;
+    }
+
+    .message-box {
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px 30px;
+      border-radius: 8px;
+      max-width: 600px;
+      text-align: center;
+      animation: rise 1s ease-out forwards;
+    }
+    .highlight {
+      color: #E31414;
       font-weight: bold;
-      margin-bottom: 15px;
+    }
+
+
+    @keyframes rise {
+      from {
+        transform: translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* --- STYLES FOR THE TRACK STATS SECTION --- */
+    .track-stats-container, .conclusion-container, .pole-chances-container, .reasons-container, .season-chart-container, .final-season-container, .final-conclusion-container, .thank-you-message {
+      max-width: 1200px;
+      margin: 15vh auto;
+      padding: 20px;
       text-align: center;
     }
 
-    .frame {
-      width: 1000px;
-      height: 562px;
-      outline: 1px solid black;
-      position: relative;
-      background: #EAEAEA;
+    .section-intro {
+      font-size: 1.25rem;
+      color: #e0e0e0;
+      max-width: 700px;
+      margin: 0 auto 80px auto;
+      line-height: 1.6;
+    }
+    
+    .conclusion-container .section-intro {
+        margin-bottom: 20px;
     }
 
-    .radio {
-      position: absolute;
-      top: 60px;
-      left: 670px; /* moved more to the right */
-      z-index: 10;
-      font-size: 16px;
-      font-weight: bold;
-      display: flex;
+    .tracks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 50px 40px; /* Row and column gap */
     }
 
-    .legend-footer {
-      position: absolute;
-      bottom: 12px;
-      left: 600px;
-      display: flex;
-      gap: 18px;
-      font-size: 12px;
-    }
-
-    .legend-footer .box {
-      display: inline-block;
-      width: 18px;
-      height: 18px;
-      margin-right: 7px;
-    }
-
-    .legend-footer .item {
+    .track-card {
       display: flex;
       align-items: center;
+      gap: 20px;
     }
+
+    .track-card h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+      width: 140px; /* Fixed width for alignment */
+      text-align: right; /* Reverted to right alignment */
+    }
+
+    .track-lines {
+      display: flex; /* Using flexbox for consistent rendering */
+      gap: 2px; 
+      height: 60px;
+      width: 100%;
+    }
+
+    .track-line {
+      width: 3px; /* Set a fixed width for each line to ensure even thickness */
+      height: 100%;
+      border-radius: 1px;
+    }
+
+    .p1-win {
+      background-color: #E31414; /* Red for P1 wins */
+    }
+
+    .other-win {
+      background-color: #c0c0c0; /* Gray for other wins */
+    }
+
+    /* --- STYLES FOR POLE POSITION CHANCES BAR --- */
+    .pole-chances-container {
+      max-width: 900px;
+    }
+
+    .bar-chart-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .bar-chart {
+      display: flex;
+      width: 100%;
+      height: 40px;
+      margin-bottom: 20px;
+    }
+
+    .bar-segment {
+      height: 100%;
+      position: relative;
+      transition: filter 0.2s;
+    }
+
+    .bar-segment:first-child {
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+    }
+    .bar-segment:last-child {
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+    }
+    
+    .bar-segment:hover {
+        filter: brightness(1.2);
+        cursor: pointer;
+    }
+
+    .bar-segment::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 110%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #222;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+      font-size: 0.9rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+      z-index: 20;
+    }
+
+    .bar-segment:hover::after {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .bar-legend {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 20px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+
+    .legend-color {
+        width: 15px;
+        height: 15px;
+        border-radius: 3px;
+    }
+
+    /* --- STYLES FOR REASONS SECTION --- */
+    .reasons-container .section-intro {
+        font-size: 1.6rem; /* Bigger font size */
+        font-weight: 700; /* Bolder text */
+    }
+    
+    .reasons-scroll-wrapper {
+        height: 400vh; /* Provides scroll space */
+        position: relative;
+    }
+
+    .reasons-sticky-container {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2%; /* Reduced gap to bring text closer */
+    }
+
+    .side-text-container {
+        width: 5%;
+        height: 100%;
+        position: relative;
+    }
+
+    .side-text {
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform-origin: center;
+        transform: translate(-50%, -50%) rotate(180deg);
+        font-size: 1.1rem;
+        color: #888;
+        transition: opacity 0.5s ease;
+        opacity: 0;
+    }
+
+    .side-text.active {
+        opacity: 1;
+        color: #fff;
+    }
+
+    .cards-container {
+        width: 70%;
+        max-width: 700px;
+        height: 70vh;
+        position: relative;
+    }
+
+    .reason-card {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        transition: transform 0.7s ease, opacity 0.7s ease;
+        will-change: transform, opacity;
+    }
+
+    .reason-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 12px;
+    }
+
+    /* --- STYLES FOR SEASON LINE CHART --- */
+    .season-chart-scroll-wrapper {
+        height: 300vh; /* Provides scroll space for the transition */
+    }
+    .season-chart-sticky-container {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+    #seasonChart {
+        width: 100%;
+        min-height: 500px;
+        transition: transform 0.5s ease-in-out;
+    }
+    #seasonChart.scaled-down {
+        transform: scale(0.8) translateY(-10vh);
+    }
+    .peak-story-box {
+        position: absolute;
+        bottom: 15vh; /* Lowered position */
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(34, 34, 34, 0.85);
+        backdrop-filter: blur(5px);
+        padding: 20px;
+        border-radius: 10px;
+        width: auto;
+        max-width: 90%;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        pointer-events: none;
+        z-index: 30;
+    }
+    .peak-story-box.visible {
+        opacity: 1;
+    }
+    .peak-story-box img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #555;
+    }
+    .story-year {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #E31414;
+        margin-right: 15px;
+        align-self: center;
+    }
+    .story-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        gap: 15px;
+    }
+    .driver-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-align: left;
+    }
+    .vs-text {
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin: 0 15px;
+    }
+
+    .line-chart-tooltip {
+        position: absolute;
+        text-align: center;
+        width: auto;
+        padding: 10px;
+        font: 12px sans-serif;
+        background: #222;
+        border: 0px;
+        border-radius: 8px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    .axis-label {
+        font-size: 0.9rem;
+        fill: #aaa;
+    }
+    
+    .sixty-percent-line {
+        stroke: #777;
+        stroke-width: 1;
+        stroke-dasharray: 4,4;
+    }
+    .peak-highlighter {
+        stroke: red;
+        stroke-width: 2px;
+        fill: rgba(255, 0, 0, 0.2);
+        animation: pulse 1.5s infinite;
+        opacity: 0;
+        transition: opacity 0.3s;
+        transform-origin: center;
+    }
+    .peak-highlighter.active {
+        opacity: 1;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.5); }
+        100% { transform: scale(1); }
+    }
+    .chart-footer {
+        position: absolute;
+        bottom: 5vh;
+        width: 100%;
+        text-align: center;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        pointer-events: none;
+    }
+    .chart-footer.visible {
+        opacity: 1;
+        pointer-events: all;
+    }
+    #chart-initial-title {
+        transition: opacity 0.5s ease;
+        position: absolute;
+        top: 10vh;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    #chart-initial-title.hidden {
+        opacity: 0;
+    }
+    .peak-percentage-label {
+        font-size: 0.9rem;
+        font-weight: bold;
+        fill: #E31414;
+        text-anchor: middle;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .peak-percentage-label.active {
+        opacity: 1;
+    }
+    .scrolly-text-box {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+        background-color: rgba(0, 0, 0, 0.85);
+        padding: 30px 40px;
+        border-radius: 10px;
+        max-width: 650px;
+        font-size: 1.5rem;
+        line-height: 1.6;
+        text-align: center;
+        z-index: 40;
+    }
+    .chart-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.8);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s ease-in-out;
+        z-index: 25;
+    }
+    .next-peak-btn {
+        background-color: #E31414;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-family: 'Titillium Web', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin: 0 10px;
+    }
+    .next-peak-btn:hover {
+        background-color: #b51010;
+    }
+    
+    /* --- STYLES FOR FINAL SEASON SECTION --- */
+    .final-season-container .bar-chart-title,
+    .final-conclusion-container .bar-chart-title {
+        margin-bottom: 40px;
+    }
+    .final-season-container p {
+        font-size: 1.2rem;
+        color: #e0e0e0;
+        max-width: 700px;
+        margin: 40px auto;
+    }
+    .final-lines-container {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        height: 80px;
+        margin: 30px 0;
+    }
+    .final-line {
+        width: 6px;
+        height: 100%;
+        border-radius: 3px;
+        background-color: grey;
+        transition: background-color 1s ease;
+    }
+    .final-line.red { background-color: #E31414; }
+    .final-line.mclaren { background-color: #FF8000; }
+    .final-line.teal { background-color: #04BFB6; }
+    
+    .thank-you-message {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+
   </style>
 </head>
 <body>
 
-  <h1># of Unique Words Used Within Artist’s First 35,000 Lyrics</h1>
-
-  <div class="frame">
-    <div id="choices" class="radio"></div>
-    <div id="chart"></div>
-    <div class="legend-footer">
-      <div class="item"><div class="box" style="background:#44b0fb;"></div>East Coast</div>
-      <div class="item"><div class="box" style="background:#e94953;"></div>West Coast</div>
-      <div class="item"><div class="box" style="background:#9694f7;"></div>Southern</div>
-      <div class="item"><div class="box" style="background:#8DF2AD;"></div>Midwest</div>
+  <div class="intro-container">
+    <img src="https://clipground.com/images/f1-logo-png-1.png" alt="Formula 1 Logo" class="f1-logo" onerror="this.style.display='none'">
+    <h1>DOES STARTING FIRST MEAN HIGHER CHANCE OF WINNING?</h1>
+    <p class="subheading">Every Formula One driver wants to start at the front of the grid. It's the dream spot during qualifying. No reward in points, no medals – just a psychological edge and clear air ahead. But how often does this golden start actually lead to a win?</p>
+    <p class="meta-info">
+      August 2025<br>
+      By Sivaparvathi S
+    </p>
+    <img src="https://corp.formula1.com/wp-content/uploads/2022/02/Netflix-KV-horizontal.jpg" alt="Drive to Survive Netflix Poster" class="main-image" onerror="this.onerror=null;this.src='https://placehold.co/800x450/111111/FFFFFF?text=Image+Not+Found';">
+    <div class="intro-text">
+      <p>Like many others my age, I got into Formula 1 after watching <em>Drive to Survive</em>. I didn’t grow up following the sport, but the drama, rivalries, and intense moments got me completely hooked.</p>
+      <p>Soon I started watching the real races, and naturally, I picked a favourite driver. Every time he secured pole position, I felt <strong>excited</strong>! I felt like he had the best chance to win.</p>
+      <p>But more often than not, things didn’t go as expected. Despite starting first, he didn’t always finish first.</p>
+      <p>At first, I thought it was just bad luck or poor strategy. But after seeing it happen again and again, I became curious, <strong>has this always been the case?</strong></p>
     </div>
   </div>
 
-  <script type="module">
-    import { Runtime, Inspector } from "https://cdn.jsdelivr.net/npm/@observablehq/runtime@5/dist/runtime.js";
-    import define from "https://api.observablehq.com/d/120634d692da8f6f.js?v=4";
+  <div class="container">
+    <div class="lines-container" id="linesContainer"></div>
 
-    new Runtime().module(define, name => {
-      if (name === "viewof choices") return new Inspector(document.getElementById("choices"));
-      if (name === "chart") return new Inspector(document.getElementById("chart"));
+    <div class="message" id="message1">
+      <div class="message-box">
+        When I looked at the history from 1950 till 2024, Every Season, Every Race – not all races were won by the driver who qualified to start first.
+      </div>
+    </div>
+
+    <div class="message" id="message2">
+      <div class="message-box">
+        Out of 1150 races, only <span class="highlight">492</span> were won by the first on the grid driver.
+      </div>
+    </div>
+
+    <div class="message" id="message3">
+      <div class="message-box">
+        That makes only <span class="highlight">42.78%</span> of races where pole sitters converted their start to a Grand Prix win.
+      </div>
+    </div>
+  </div>
+
+  <!-- --- TRACK STATISTICS SECTION --- -->
+  <div class="track-stats-container">
+      <p class="section-intro">Hmm, so... all of these races were held across multiple race tracks. Now, let's look at the wins per race track. Are there any tracks where polesitters tend to lose most of the time?</p>
+      <div id="tracksGrid" class="tracks-grid">
+        <!-- Track visuals will be dynamically generated here by JavaScript -->
+      </div>
+  </div>
+
+  <!-- --- CONCLUSION SECTION --- -->
+  <div class="conclusion-container">
+      <p class="section-intro">It's commonly believed that street circuits are favorable for polesitters, but the pole win percentages at street circuits like Baku, Las Vegas, Miami, Melbourne, and Monaco are surprisingly low, whereas Montreal is neutral. Only Jeddah and Singapore show clear favorability.</p>
+      <p class="section-intro">Overall, most tracks have not favored pole conversion. Let's take a look-</p>
+  </div>
+
+  <!-- --- POLE POSITION CHANCES BAR --- -->
+  <div class="pole-chances-container">
+    <h3 class="bar-chart-title">Track Favorability for Pole Sitters</h3>
+    <div id="poleBar" class="bar-chart">
+        <!-- Segments will be generated by JS -->
+    </div>
+    <div id="poleLegend" class="bar-legend">
+        <!-- Legend will be generated by JS -->
+    </div>
+  </div>
+
+  <!-- --- REASONS SCROLL SECTION --- -->
+  <div class="reasons-container">
+      <p class="section-intro" style="max-width: 800px;">Here is a breakdown of why some F1 tracks are historically unfavourable for pole-to-win conversions.</p>
+      <div class="reasons-scroll-wrapper">
+          <div class="reasons-sticky-container">
+              <div class="side-text-container" id="sideTextContainer">
+                  <!-- Side text will be generated by JS -->
+              </div>
+              <div class="cards-container" id="cardsContainer">
+                  <!-- Cards will be generated by JS -->
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- --- SEASON LINE CHART SECTION --- -->
+    <div class="season-chart-container">
+        <p class="section-intro" style="max-width: 800px;">All seasons feature a mix of different types of race tracks, along with various unpredictabilities and unfavourable conditions. Sometimes, polesitters manage to convert well throughout a season. Let’s take a look at how pole conversion rates have varied across all seasons in history.</p>
+        <div class="season-chart-scroll-wrapper">
+            <div class="season-chart-sticky-container">
+                <h2 id="chart-initial-title" class="bar-chart-title">Pole Conversion Rate Across Seasons</h2>
+                <div id="chart-overlay" class="chart-overlay"></div>
+                <div id="scrolly-text-container" class="scrolly-text-box">Interestingly, these peaks in season-wise average pole conversion rates highlight legendary periods in Formula One history.</div>
+                <div id="seasonChart"></div>
+                <div id="peakStoriesContainer"></div>
+                <div id="chart-interactive-footer" class="chart-footer">
+                    <div>
+                        <button id="prevPeakBtn" class="next-peak-btn">&lt; Prev</button>
+                        <button id="nextPeakBtn" class="next-peak-btn">Next &gt;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- FINAL SEASON SECTION --- -->
+    <div class="final-season-container">
+        <h2 class="bar-chart-title" style="font-size: 2rem;">2025 Season So Far</h2>
+        <p>7 out of 14 races had their polesitters win with 50% conversion rate</p>
+        <div id="initial-2025-lines" class="final-lines-container"></div>
+        <p>6 out of 7 pole conversion are by McLaren Drivers</p>
+        <div id="mclaren-era-lines" class="final-lines-container"></div>
+        <p><em>Are we witnessing a new McLaren era?</em></p>
+    </div>
+
+    <!-- --- FINAL CONCLUSION --- -->
+    <div class="final-conclusion-container">
+        <h2 class="bar-chart-title" style="font-size: 2rem;">Conclusion</h2>
+        <p class="section-intro" style="margin-bottom: 0;">Pole position gives an advantage — but it’s no guarantee. Sometimes it works out, but often, race-day chaos changes everything. The track, the strategy, and even luck can decide the outcome. While some legendary drivers overcame the odds, the data shows: starting first doesn’t always mean finishing first. A strong start can fade , it's the full race that shapes the result.</p>
+    </div>
+    
+    <div class="thank-you-message">
+        Thank you !
+    </div>
+
+
+  <script>
+    // --- SCRIPT FOR SCROLLING ANIMATION ---
+    const totalLines = 1150;
+    const redLinesCount = 492;
+    
+    const linesContainer = document.getElementById("linesContainer");
+    const message1 = document.getElementById("message1");
+    const message2 = document.getElementById("message2");
+    const message3 = document.getElementById("message3");
+    const trackStatsContainer = document.querySelector('.track-stats-container');
+    const conclusionContainer = document.querySelector('.conclusion-container');
+    const poleChancesContainer = document.querySelector('.pole-chances-container');
+    const reasonsContainer = document.querySelector('.reasons-container');
+    const seasonChartContainer = document.querySelector('.season-chart-container');
+
+
+    function getShuffledIndices(count, total) {
+      const indices = Array.from({ length: total }, (_, i) => i);
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      return new Set(indices.slice(0, count));
+    }
+
+    const redRandomIndices = getShuffledIndices(redLinesCount, totalLines);
+
+    for (let i = 0; i < totalLines; i++) {
+      const line = document.createElement("div");
+      line.classList.add("line");
+      line.dataset.index = i;
+      linesContainer.appendChild(line);
+    }
+
+    function updateLines(mode) {
+      const allLines = document.querySelectorAll(".line");
+      allLines.forEach((line, index) => {
+        if (mode === "gray") {
+          line.style.backgroundColor = "gray";
+        } else if (mode === "randomRed") {
+          line.style.backgroundColor = redRandomIndices.has(index) ? "#E31414" : "gray";
+        } else if (mode === "firstRed") {
+          line.style.backgroundColor = index < redLinesCount ? "#E31414" : "gray";
+        }
+      });
+    }
+
+    function getMiddleTriggerY(el) {
+      const rect = el.getBoundingClientRect();
+      return rect.top + rect.height / 2;
+    }
+
+    function handleScroll() {
+        const screenCenter = window.innerHeight / 2;
+        const m1Center = getMiddleTriggerY(message1);
+        const m2Center = getMiddleTriggerY(message2);
+        const m3Center = getMiddleTriggerY(message3);
+        const trackStatsRect = trackStatsContainer.getBoundingClientRect();
+
+        let inMessageZone = m1Center < screenCenter && trackStatsRect.top > 0;
+        
+        if (inMessageZone) {
+            linesContainer.style.display = 'grid';
+            
+            const fadeStartPoint = window.innerHeight; 
+            const fadeEndPoint = window.innerHeight * 0.8; 
+            let opacity = 1;
+
+            if (trackStatsRect.top < fadeStartPoint) {
+                opacity = (trackStatsRect.top - fadeEndPoint) / (fadeStartPoint - fadeEndPoint);
+                opacity = Math.max(0, Math.min(1, opacity));
+            }
+            linesContainer.style.opacity = opacity;
+
+            if (m2Center < screenCenter && m3Center >= screenCenter) {
+                updateLines("randomRed");
+            } else if (m3Center < screenCenter) {
+                updateLines("firstRed");
+            } else {
+                updateLines("gray");
+            }
+        } else {
+            linesContainer.style.opacity = '0';
+            linesContainer.style.display = 'none';
+        }
+    }
+
+    window.addEventListener("scroll", handleScroll);
+
+    // --- SCRIPT FOR TRACK STATS SECTION ---
+    const f1TrackData = [
+        { "Track": "Abu Dhabi, United Arab Emirates", "Total Wins": 16, "P1 Wins": 5 }, { "Track": "Adelaide, Australia", "Total Wins": 11, "P1 Wins": 4 }, { "Track": "Aida, Japan", "Total Wins": 2, "P1 Wins": 1 }, { "Track": "Aintree, United Kingdom", "Total Wins": 5, "P1 Wins": 1 }, { "Track": "Anderstorp, Sweden", "Total Wins": 6, "P1 Wins": 2 }, { "Track": "Austin, United States of America", "Total Wins": 12, "P1 Wins": 5 }, { "Track": "Baku, Azerbaijan", "Total Wins": 8, "P1 Wins": 2 }, { "Track": "Barcelona, Spain", "Total Wins": 6, "P1 Wins": 1 }, { "Track": "Berlin, Germany", "Total Wins": 1, "P1 Wins": 1 }, { "Track": "Bern, Switzerland", "Total Wins": 5, "P1 Wins": 1 }, { "Track": "Bowmanville, Canada", "Total Wins": 8, "P1 Wins": 4 }, { "Track": "Budapest, Hungary", "Total Wins": 39, "P1 Wins": 18 }, { "Track": "Buenos Aires, Argentina", "Total Wins": 21, "P1 Wins": 8 }, { "Track": "Casablanca, Morocco", "Total Wins": 1, "P1 Wins": 0 }, { "Track": "Clermont-Ferrand, France", "Total Wins": 4, "P1 Wins": 2 }, { "Track": "Dallas, United States of America", "Total Wins": 1, "P1 Wins": 0 }, { "Track": "Detroit, United States of America", "Total Wins": 8, "P1 Wins": 3 }, { "Track": "Dijon, France", "Total Wins": 6, "P1 Wins": 2 }, { "Track": "East London, South Africa", "Total Wins": 2, "P1 Wins": 2 }, { "Track": "Estoril, Portugal", "Total Wins": 13, "P1 Wins": 6 }, { "Track": "Fawkham, United Kingdom", "Total Wins": 14, "P1 Wins": 4 }, { "Track": "Greater Noida, India", "Total Wins": 3, "P1 Wins": 3 }, { "Track": "Heusden-Zolder, Belgium", "Total Wins": 10, "P1 Wins": 2 }, { "Track": "Hockenheim, Germany", "Total Wins": 37, "P1 Wins": 18 }, { "Track": "Imola, Italy", "Total Wins": 32, "P1 Wins": 11 }, { "Track": "Indianapolis, United States of America", "Total Wins": 19, "P1 Wins": 5 }, { "Track": "Istanbul, Turkey", "Total Wins": 9, "P1 Wins": 6 }, { "Track": "Jeddah, Saudi Arabia", "Total Wins": 5, "P1 Wins": 3 }, { "Track": "Jerez de la Frontera, Spain", "Total Wins": 7, "P1 Wins": 3 }, { "Track": "Las Vegas, United States of America", "Total Wins": 4, "P1 Wins": 1 }, { "Track": "Le Castellet, France", "Total Wins": 18, "P1 Wins": 11 }, { "Track": "Le Mans, France", "Total Wins": 1, "P1 Wins": 0 }, { "Track": "Leicestershire, United Kingdom", "Total Wins": 1, "P1 Wins": 1 }, { "Track": "Lisbon, Portugal", "Total Wins": 1, "P1 Wins": 1 }, { "Track": "Long Beach, United States of America", "Total Wins": 8, "P1 Wins": 4 }, { "Track": "Lusail, Qatar", "Total Wins": 3, "P1 Wins": 2 }, { "Track": "Madrid, Spain", "Total Wins": 9, "P1 Wins": 4 }, { "Track": "Melbourne, Australia", "Total Wins": 28, "P1 Wins": 12 }, { "Track": "Mexico City, Mexico", "Total Wins": 24, "P1 Wins": 11 }, { "Track": "Miami Gardens, United States of America", "Total Wins": 4, "P1 Wins": 1 }, { "Track": "Midrand, South Africa", "Total Wins": 20, "P1 Wins": 4 }, { "Track": "Monte-Carlo, Monaco", "Total Wins": 71, "P1 Wins": 33 }, { "Track": "Montmeló, Spain", "Total Wins": 35, "P1 Wins": 25 }, { "Track": "Montreal, Canada", "Total Wins": 44, "P1 Wins": 22 }, { "Track": "Mont-Tremblant, Canada", "Total Wins": 2, "P1 Wins": 0 }, { "Track": "Monza, Italy", "Total Wins": 74, "P1 Wins": 25 }, { "Track": "Nürburg, Germany", "Total Wins": 41, "P1 Wins": 15 }, { "Track": "Nevers, France", "Total Wins": 18, "P1 Wins": 5 }, { "Track": "Nivelles, Belgium", "Total Wins": 4, "P1 Wins": 1 }, { "Track": "Oyama, Japan", "Total Wins": 4, "P1 Wins": 2 }, { "Track": "Pescara, Italy", "Total Wins": 1, "P1 Wins": 0 }, { "Track": "Phoenix, United States of America", "Total Wins": 3, "P1 Wins": 1 }, { "Track": "Portimão, Portugal", "Total Wins": 2, "P1 Wins": 1 }, { "Track": "Porto, Portugal", "Total Wins": 2, "P1 Wins": 1 }, { "Track": "Reims, France", "Total Wins": 11, "P1 Wins": 7 }, { "Track": "Rio de Janeiro, Brazil", "Total Wins": 10, "P1 Wins": 1 }, { "Track": "Riverside, United States of America", "Total Wins": 1, "P1 Wins": 1 }, { "Track": "Rouen, France", "Total Wins": 5, "P1 Wins": 2 }, { "Track": "São Paulo, Brazil", "Total Wins": 41, "P1 Wins": 18 }, { "Track": "Sakhir, Bahrain", "Total Wins": 22, "P1 Wins": 11 }, { "Track": "Scarperia e San Piero, Italy", "Total Wins": 1, "P1 Wins": 1 }, { "Track": "Sebring, United States of America", "Total Wins": 1, "P1 Wins": 0 }, { "Track": "Sepang, Malaysia", "Total Wins": 19, "P1 Wins": 9 }, { "Track": "Shanghai, China", "Total Wins": 18, "P1 Wins": 11 }, { "Track": "Silverstone, United Kingdom", "Total Wins": 60, "P1 Wins": 22 }, { "Track": "Singapore, Singapore", "Total Wins": 13, "P1 Wins": 10 }, { "Track": "Sochi, Russia", "Total Wins": 8, "P1 Wins": 2 }, { "Track": "Spa, Belgium", "Total Wins": 58, "P1 Wins": 21 }, { "Track": "Spielberg, Austria", "Total Wins": 39, "P1 Wins": 15 }, { "Track": "Suzuka, Japan", "Total Wins": 35, "P1 Wins": 19 }, { "Track": "Valencia, Spain", "Total Wins": 5, "P1 Wins": 3 }, { "Track": "Watkins Glen, United States of America", "Total Wins": 20, "P1 Wins": 10 }, { "Track": "Yeongam, South Korea", "Total Wins": 4, "P1 Wins": 1 }, { "Track": "Zandvoort, Netherlands", "Total Wins": 34, "P1 Wins": 16 }, { "Track": "Zeltweg, Austria", "Total Wins": 1, "P1 Wins": 0 }
+    ];
+
+    function createTrackVisuals() {
+      const grid = document.getElementById('tracksGrid');
+      if (!grid) return;
+      f1TrackData.sort((a, b) => b['Total Wins'] - a['Total Wins']);
+      f1TrackData.forEach(track => {
+        const totalWins = track['Total Wins'];
+        const p1Wins = track['P1 Wins'];
+        const trackName = track.Track.split(',')[0];
+        const trackCard = document.createElement('div');
+        trackCard.className = 'track-card';
+        const title = document.createElement('h3');
+        title.textContent = trackName;
+        const linesContainer = document.createElement('div');
+        linesContainer.className = 'track-lines';
+        for (let i = 0; i < totalWins; i++) {
+          const line = document.createElement('div');
+          line.className = 'track-line';
+          if (i < p1Wins) {
+            line.classList.add('p1-win');
+          } else {
+            line.classList.add('other-win');
+          }
+          linesContainer.appendChild(line);
+        }
+        trackCard.appendChild(title);
+        trackCard.appendChild(linesContainer);
+        grid.appendChild(trackCard);
+      });
+    }
+    createTrackVisuals();
+
+    // --- SCRIPT FOR POLE POSITION CHANCES BAR ---
+    const polePositionData = [
+        { "Chances for pole to win": "Likely", "Number of Tracks": 18, "Color": "#E31414" }, { "Chances for pole to win": "Neutral", "Number of Tracks": 11, "Color": "#c0c0c0" }, { "Chances for pole to win": "Not likely", "Number of Tracks": 46, "Color": "#ffffff" }
+    ];
+
+    function createPolePositionBar() {
+        const barContainer = document.getElementById('poleBar');
+        const legendContainer = document.getElementById('poleLegend');
+        if (!barContainer || !legendContainer) return;
+        const totalTracks = polePositionData.reduce((sum, item) => sum + item['Number of Tracks'], 0);
+        polePositionData.forEach(item => {
+            const segment = document.createElement('div');
+            segment.className = 'bar-segment';
+            const percentage = (item['Number of Tracks'] / totalTracks) * 100;
+            segment.style.width = `${percentage}%`;
+            segment.style.backgroundColor = item.Color;
+            const label = item['Chances for pole to win'];
+            segment.setAttribute('data-tooltip', `${label}: ${item['Number of Tracks']} Tracks (${percentage.toFixed(2)}%)`);
+            barContainer.appendChild(segment);
+            const legendItem = document.createElement('div');
+            legendItem.className = 'legend-item';
+            const legendColor = document.createElement('div');
+            legendColor.className = 'legend-color';
+            legendColor.style.backgroundColor = item.Color;
+            const legendText = document.createElement('span');
+            legendText.textContent = item['Chances for pole to win'];
+            legendItem.appendChild(legendColor);
+            legendItem.appendChild(legendText);
+            legendContainer.appendChild(legendItem);
+        });
+    }
+    createPolePositionBar();
+
+    // --- SCRIPT FOR REASONS SCROLL SECTION ---
+    const reasonsData = [
+        { img: "https://raw.githubusercontent.com/Chipz-02/vizportfolio/refs/heads/main/F1%20Reason%201.png", text: "Montreal, Monza, Baku" },
+        { img: "https://raw.githubusercontent.com/Chipz-02/vizportfolio/refs/heads/main/F1%20Reason%202.png", text: "Miami, Silverstone, Mexico City" },
+        { img: "https://raw.githubusercontent.com/Chipz-02/vizportfolio/refs/heads/main/F1%20Reason%203.png", text: "Melbourne, Hockenheim, Spa" },
+        { img: "https://raw.githubusercontent.com/Chipz-02/vizportfolio/refs/heads/main/F1%20Reason%204.png", text: "Monaco, Las Vegas, Sochi" }
+    ];
+
+    function createReasonsSection() {
+        const cardsContainer = document.getElementById('cardsContainer');
+        const sideTextContainer = document.getElementById('sideTextContainer');
+        if (!cardsContainer || !sideTextContainer) return;
+
+        reasonsData.forEach((reason, index) => {
+            // Create card
+            const card = document.createElement('div');
+            card.className = 'reason-card';
+            card.style.zIndex = reasonsData.length - index;
+            card.innerHTML = `<img src="${reason.img}" alt="Reason ${index + 1}">`;
+            cardsContainer.appendChild(card);
+
+            // Create side text
+            const text = document.createElement('div');
+            text.className = 'side-text';
+            text.textContent = reason.text;
+            sideTextContainer.appendChild(text);
+        });
+
+        handleReasonsScroll(); // Initial call
+    }
+
+    function handleReasonsScroll() {
+        const wrapper = document.querySelector('.reasons-scroll-wrapper');
+        if (!wrapper) return;
+
+        const rect = wrapper.getBoundingClientRect();
+        const scrollY = window.scrollY;
+        const wrapperTop = wrapper.offsetTop;
+        const wrapperHeight = wrapper.offsetHeight;
+        
+        let progress = (scrollY - wrapperTop) / (wrapperHeight - window.innerHeight);
+        progress = Math.max(0, Math.min(1, progress));
+
+        const cards = document.querySelectorAll('.reason-card');
+        const sideTexts = document.querySelectorAll('.side-text');
+        const numCards = cards.length;
+        
+        const step = 1 / numCards;
+        const activeIndex = Math.min(Math.floor(progress / step), numCards - 1);
+
+        cards.forEach((card, index) => {
+            const stackIndex = index - activeIndex;
+
+            if (stackIndex < 0) {
+                // Animate passed cards away
+                card.style.transform = `translateY(-60px) scale(0.9)`;
+                card.style.opacity = '0';
+            } else {
+                // Position the current stack
+                card.style.transform = `translateX(${stackIndex * 15}px) translateY(${stackIndex * 15}px)`;
+                card.style.opacity = '1';
+            }
+        });
+
+        sideTexts.forEach((text, index) => {
+            if (index === activeIndex) {
+                text.classList.add('active');
+            } else {
+                text.classList.remove('active');
+            }
+        });
+    }
+
+    window.addEventListener('scroll', handleReasonsScroll);
+    createReasonsSection();
+
+    // --- SCRIPT FOR SEASON LINE CHART ---
+    const seasonPoleData = [
+        { Season: 1950, "Races Won from Pole": 3, "Races in Season": 7, "Pole Conversion Rate": 42.9 },
+        { Season: 1951, "Races Won from Pole": 4, "Races in Season": 8, "Pole Conversion Rate": 50 },
+        { Season: 1952, "Races Won from Pole": 5, "Races in Season": 8, "Pole Conversion Rate": 62.5 },
+        { Season: 1953, "Races Won from Pole": 4, "Races in Season": 9, "Pole Conversion Rate": 44.4 },
+        { Season: 1954, "Races Won from Pole": 4, "Races in Season": 9, "Pole Conversion Rate": 44.4 },
+        { Season: 1955, "Races Won from Pole": 3, "Races in Season": 7, "Pole Conversion Rate": 42.9 },
+        { Season: 1956, "Races Won from Pole": 3, "Races in Season": 8, "Pole Conversion Rate": 37.5 },
+        { Season: 1957, "Races Won from Pole": 4, "Races in Season": 8, "Pole Conversion Rate": 50 },
+        { Season: 1958, "Races Won from Pole": 2, "Races in Season": 11, "Pole Conversion Rate": 18.2 },
+        { Season: 1959, "Races Won from Pole": 6, "Races in Season": 9, "Pole Conversion Rate": 66.7 },
+        { Season: 1960, "Races Won from Pole": 6, "Races in Season": 10, "Pole Conversion Rate": 60 },
+        { Season: 1961, "Races Won from Pole": 2, "Races in Season": 8, "Pole Conversion Rate": 25 },
+        { Season: 1962, "Races Won from Pole": 2, "Races in Season": 9, "Pole Conversion Rate": 22.2 },
+        { Season: 1963, "Races Won from Pole": 6, "Races in Season": 10, "Pole Conversion Rate": 60 },
+        { Season: 1964, "Races Won from Pole": 3, "Races in Season": 10, "Pole Conversion Rate": 30 },
+        { Season: 1965, "Races Won from Pole": 6, "Races in Season": 10, "Pole Conversion Rate": 60 },
+        { Season: 1966, "Races Won from Pole": 4, "Races in Season": 9, "Pole Conversion Rate": 44.4 },
+        { Season: 1967, "Races Won from Pole": 2, "Races in Season": 11, "Pole Conversion Rate": 18.2 },
+        { Season: 1968, "Races Won from Pole": 2, "Races in Season": 12, "Pole Conversion Rate": 16.7 },
+        { Season: 1969, "Races Won from Pole": 4, "Races in Season": 11, "Pole Conversion Rate": 36.4 },
+        { Season: 1970, "Races Won from Pole": 2, "Races in Season": 13, "Pole Conversion Rate": 15.4 },
+        { Season: 1971, "Races Won from Pole": 6, "Races in Season": 11, "Pole Conversion Rate": 54.5 },
+        { Season: 1972, "Races Won from Pole": 4, "Races in Season": 12, "Pole Conversion Rate": 33.3 },
+        { Season: 1973, "Races Won from Pole": 4, "Races in Season": 15, "Pole Conversion Rate": 26.7 },
+        { Season: 1974, "Races Won from Pole": 5, "Races in Season": 15, "Pole Conversion Rate": 33.3 },
+        { Season: 1975, "Races Won from Pole": 4, "Races in Season": 14, "Pole Conversion Rate": 28.6 },
+        { Season: 1976, "Races Won from Pole": 11, "Races in Season": 16, "Pole Conversion Rate": 68.8 },
+        { Season: 1977, "Races Won from Pole": 4, "Races in Season": 17, "Pole Conversion Rate": 23.5 },
+        { Season: 1978, "Races Won from Pole": 7, "Races in Season": 16, "Pole Conversion Rate": 43.8 },
+        { Season: 1979, "Races Won from Pole": 6, "Races in Season": 15, "Pole Conversion Rate": 40 },
+        { Season: 1980, "Races Won from Pole": 2, "Races in Season": 14, "Pole Conversion Rate": 14.3 },
+        { Season: 1981, "Races Won from Pole": 3, "Races in Season": 15, "Pole Conversion Rate": 20 },
+        { Season: 1982, "Races Won from Pole": 2, "Races in Season": 16, "Pole Conversion Rate": 12.5 },
+        { Season: 1983, "Races Won from Pole": 3, "Races in Season": 15, "Pole Conversion Rate": 20 },
+        { Season: 1984, "Races Won from Pole": 6, "Races in Season": 16, "Pole Conversion Rate": 37.5 },
+        { Season: 1985, "Races Won from Pole": 3, "Races in Season": 16, "Pole Conversion Rate": 18.8 },
+        { Season: 1986, "Races Won from Pole": 4, "Races in Season": 16, "Pole Conversion Rate": 25 },
+        { Season: 1987, "Races Won from Pole": 5, "Races in Season": 16, "Pole Conversion Rate": 31.3 },
+        { Season: 1988, "Races Won from Pole": 9, "Races in Season": 16, "Pole Conversion Rate": 56.3 },
+        { Season: 1989, "Races Won from Pole": 7, "Races in Season": 16, "Pole Conversion Rate": 43.8 },
+        { Season: 1990, "Races Won from Pole": 7, "Races in Season": 16, "Pole Conversion Rate": 43.8 },
+        { Season: 1991, "Races Won from Pole": 12, "Races in Season": 16, "Pole Conversion Rate": 75 },
+        { Season: 1992, "Races Won from Pole": 9, "Races in Season": 16, "Pole Conversion Rate": 56.3 },
+        { Season: 1993, "Races Won from Pole": 7, "Races in Season": 16, "Pole Conversion Rate": 43.8 },
+        { Season: 1994, "Races Won from Pole": 7, "Races in Season": 16, "Pole Conversion Rate": 43.8 },
+        { Season: 1995, "Races Won from Pole": 5, "Races in Season": 17, "Pole Conversion Rate": 29.4 },
+        { Season: 1996, "Races Won from Pole": 4, "Races in Season": 16, "Pole Conversion Rate": 25 },
+        { Season: 1997, "Races Won from Pole": 8, "Races in Season": 17, "Pole Conversion Rate": 47.1 },
+        { Season: 1998, "Races Won from Pole": 7, "Races in Season": 16, "Pole Conversion Rate": 43.8 },
+        { Season: 1999, "Races Won from Pole": 3, "Races in Season": 16, "Pole Conversion Rate": 18.8 },
+        { Season: 2000, "Races Won from Pole": 7, "Races in Season": 17, "Pole Conversion Rate": 41.2 },
+        { Season: 2001, "Races Won from Pole": 7, "Races in Season": 17, "Pole Conversion Rate": 41.2 },
+        { Season: 2002, "Races Won from Pole": 6, "Races in Season": 17, "Pole Conversion Rate": 35.3 },
+        { Season: 2003, "Races Won from Pole": 9, "Races in Season": 16, "Pole Conversion Rate": 56.3 },
+        { Season: 2004, "Races Won from Pole": 11, "Races in Season": 18, "Pole Conversion Rate": 61.1 },
+        { Season: 2005, "Races Won from Pole": 9, "Races in Season": 19, "Pole Conversion Rate": 47.4 },
+        { Season: 2006, "Races Won from Pole": 10, "Races in Season": 18, "Pole Conversion Rate": 55.6 },
+        { Season: 2007, "Races Won from Pole": 11, "Races in Season": 17, "Pole Conversion Rate": 64.7 },
+        { Season: 2008, "Races Won from Pole": 8, "Races in Season": 18, "Pole Conversion Rate": 44.4 },
+        { Season: 2009, "Races Won from Pole": 9, "Races in Season": 17, "Pole Conversion Rate": 52.9 },
+        { Season: 2010, "Races Won from Pole": 8, "Races in Season": 19, "Pole Conversion Rate": 42.1 },
+        { Season: 2011, "Races Won from Pole": 9, "Races in Season": 19, "Pole Conversion Rate": 47.4 },
+        { Season: 2012, "Races Won from Pole": 10, "Races in Season": 20, "Pole Conversion Rate": 50 },
+        { Season: 2013, "Races Won from Pole": 10, "Races in Season": 19, "Pole Conversion Rate": 52.6 },
+        { Season: 2014, "Races Won from Pole": 9, "Races in Season": 19, "Pole Conversion Rate": 47.4 },
+        { Season: 2015, "Races Won from Pole": 12, "Races in Season": 19, "Pole Conversion Rate": 63.2 },
+        { Season: 2016, "Races Won from Pole": 13, "Races in Season": 21, "Pole Conversion Rate": 61.9 },
+        { Season: 2017, "Races Won from Pole": 11, "Races in Season": 20, "Pole Conversion Rate": 55 },
+        { Season: 2018, "Races Won from Pole": 10, "Races in Season": 21, "Pole Conversion Rate": 47.6 },
+        { Season: 2019, "Races Won from Pole": 8, "Races in Season": 21, "Pole Conversion Rate": 38.1 },
+        { Season: 2020, "Races Won from Pole": 10, "Races in Season": 17, "Pole Conversion Rate": 58.8 },
+        { Season: 2021, "Races Won from Pole": 11, "Races in Season": 22, "Pole Conversion Rate": 50 },
+        { Season: 2022, "Races Won from Pole": 10, "Races in Season": 22, "Pole Conversion Rate": 45.5 },
+        { Season: 2023, "Races Won from Pole": 14, "Races in Season": 22, "Pole Conversion Rate": 63.6 },
+        { Season: 2024, "Races Won from Pole": 11, "Races in Season": 24, "Pole Conversion Rate": 45.8 }
+    ];
+
+    const peakStories = [
+        { season: 1952, content: `<span class="story-year">1952</span><div class="driver-info"><img src="https://media.formula1.com/image/upload/t_16by9Centre/c_lfill,w_3392/q_auto/v1740000000/content/dam/fom-website/manual/Misc/2021manual/Grand-Slammers/GettyImages-104415068.webp" alt="Alberto Ascari"> <span>Alberto Ascari's Ferrari Dominance</span></div>` },
+        { season: 1959, content: `<span class="story-year">1959</span><div class="story-content"><div class="driver-info"><img src="https://www.formulasantander.com/wp-content/uploads/2018/11/Stirling-Moss.jpg" alt="Stirling Moss"> <span>Stirling Moss (Cooper)</span></div><span class="vs-text">VS</span><div class="driver-info"><img src="https://hips.hearstapps.com/hmg-prod/images/tony-brooksrennfahrer-gb-in-seinem-ferrari-rennwagen-1959-news-photo-1590704260.jpg?crop=1.00xw:0.425xh;0,0.129xh&resize=980:*" alt="Tony Brooks"><span>Tony Brooks (Ferrari)</span></div></div>` },
+        { season: 1976, content: `<span class="story-year">1976</span><div class="story-content"><div class="driver-info"><img src="https://cdn.britannica.com/13/269513-050-67F609E1/Niki-Lauda-British-Grand-Prix-Formula-One-race-car-driver-1978.jpg" alt="Niki Lauda"> <span>Niki Lauda (Ferrari)</span></div><span class="vs-text">VS</span><div class="driver-info"><img src="https://cdn.britannica.com/15/269515-050-8DAD92D8/James-Hunt-British-Formula-One-Race-car-driver-1974-Grand-Prix.jpg" alt="James Hunt"><span>James Hunt (McLaren)</span></div></div>` },
+        { season: 1991, content: `<span class="story-year">1991</span><div class="story-content"><div class="driver-info"><img src="https://librieparole.it/wp-content/uploads/2024/05/ayrton-senna.jpg" alt="Ayrton Senna"> <span>Ayrton Senna (McLaren)</span></div><span class="vs-text">VS</span><div class="driver-info"><img src="https://cdn-8.motorsport.com/images/amp/0ZRBDoV0/s1000/podium-second-place-nigel-mans.jpg" alt="Nigel Mansel"><span>Nigel Mansel (Williams)</span></div></div>` },
+        { season: 2004, content: `<span class="story-year">2004</span><div class="story-content"><div class="driver-info"><img src="https://images.hellomagazine.com/horizon/landscape/0284d38a4bac-michael-schumacher-d.jpg" alt="Michael Schumacher"> <span>Michael Schumacher (Ferrari)</span></div><span class="vs-text">+</span><div class="driver-info"><img src="https://i.imgflip.com/zokuz.jpg" alt="Rubens Barrichello"><span>Rubens Barrichello (Ferrari)</span></div></div>` },
+        { season: 2007, content: `<span class="story-year">2007</span><div class="story-content"><div class="driver-info"><img src="https://static.vecteezy.com/system/resources/previews/018/911/485/original/scuderia-ferrari-logo-editorial-free-vector.jpg" alt="Ferrari"> <span>Ferrari (Felippe Massa + Kimi Raikkonnen)</span></div><span class="vs-text">VS</span><div class="driver-info"><img src="https://static.vecteezy.com/system/resources/previews/020/500/684/large_2x/mclaren-brand-symbol-logo-orange-design-british-car-automobile-illustration-with-black-background-free-vector.jpg" alt="McLaren"><span>McLaren (Fernando Alonso + Lewis Hamilton)</span></div></div>` },
+        { season: 2015, content: `<span class="story-year">2015</span><div class="story-content"><div class="driver-info"><img src="https://a.espncdn.com/combiner/i?img=%2Fphoto%2F2016%2F0403%2Fr70369_1296x729_16-9.jpg" alt="Nico Rosberg"> <span>Nico Rosberg (Mercedes)</span></div><span class="vs-text">+</span><div class="driver-info"><img src="https://www.gbnews.com/media-library/lewis-hamilton-will-embark-on-a-farewell-year-with-mercedes.jpg?id=51594498&width=980" alt="Lewis Hamilton"><span>Lewis Hamilton (Mercedes)</span></div></div>` },
+        { season: 2016, content: `<span class="story-year">2016</span><div class="story-content"><div class="driver-info"><img src="https://a.espncdn.com/combiner/i?img=%2Fphoto%2F2016%2F0403%2Fr70369_1296x729_16-9.jpg" alt="Nico Rosberg"> <span>Nico Rosberg (Mercedes)</span></div><span class="vs-text">+</span><div class="driver-info"><img src="https://www.gbnews.com/media-library/lewis-hamilton-will-embark-on-a-farewell-year-with-mercedes.jpg?id=51594498&width=980" alt="Lewis Hamilton"><span>Lewis Hamilton (Mercedes)</span></div></div>` },
+        { season: 2023, content: `<span class="story-year">2023</span><div class="driver-info"><img src="https://staticg.sportskeeda.com/editor/2024/04/24d05-17119620437499-1920.jpg" alt="Max Verstappen"> <span>Max Verstappen's Redbull Dominance</span></div>` }
+    ];
+
+    function createInteractiveSeasonChart(data) {
+        const container = d3.select("#seasonChart");
+        if (container.empty()) return;
+
+        const margin = {top: 20, right: 60, bottom: 60, left: 60},
+            width = container.node().getBoundingClientRect().width - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+        container.select("svg").remove();
+
+        const svg = container.append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const x = d3.scaleLinear().domain(d3.extent(data, d => d.Season)).range([0, width]);
+        const y = d3.scaleLinear().domain([0, 100]).range([height, 0]);
+
+        svg.append("g").attr("transform", `translate(0, ${height})`).call(d3.axisBottom(x).tickFormat(d3.format("d"))).selectAll("text").style("fill", "#aaa");
+        svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("fill", "#aaa");
+        
+        svg.append("line").attr("x1", 0).attr("x2", width).attr("y1", y(60)).attr("y2", y(60)).attr("class", "sixty-percent-line");
+
+        svg.append("path").datum(data).attr("fill", "none").attr("stroke", "#E31414").attr("stroke-width", 2)
+            .attr("d", d3.line().x(d => x(d.Season)).y(d => y(d['Pole Conversion Rate'])));
+        
+        const tooltipCircles = svg.append("g").attr("class", "tooltip-circles");
+        tooltipCircles.selectAll("dot")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("r", 5)
+            .attr("cx", d => x(d.Season))
+            .attr("cy", d => y(d['Pole Conversion Rate']))
+            .style("fill", "#E31414")
+            .style("opacity", 0)
+            .style("cursor", "pointer")
+            .on("mouseover", (event, d) => {
+                tooltip.transition().duration(200).style("opacity", .9);
+                tooltip.html(`<b>Season:</b> ${d.Season}<br/><b>Rate:</b> ${d['Pole Conversion Rate']}%<br/><b>Wins:</b> ${d['Races Won from Pole']}/${d['Races in Season']}`)
+                    .style("left", (event.pageX + 5) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", () => {
+                tooltip.transition().duration(500).style("opacity", 0);
+            });
+
+        const peakHighlighters = svg.append("g");
+        const storiesContainer = d3.select("#peakStoriesContainer");
+        storiesContainer.html(""); // Clear previous stories
+
+        const peaks = data.filter(d => d['Pole Conversion Rate'] > 60);
+
+        peaks.forEach((peak) => {
+            peakHighlighters.append("circle")
+                .attr("class", "peak-highlighter")
+                .attr("id", `peak-${peak.Season}`)
+                .attr("cx", x(peak.Season))
+                .attr("cy", y(peak['Pole Conversion Rate']))
+                .attr("r", 8)
+                .style("transform-origin", `${x(peak.Season)}px ${y(peak['Pole Conversion Rate'])}px`);
+            
+            peakHighlighters.append("text")
+                .attr("class", "peak-percentage-label")
+                .attr("id", `peak-label-${peak.Season}`)
+                .attr("x", x(peak.Season))
+                .attr("y", y(peak['Pole Conversion Rate']) - 15)
+                .text(`${peak['Pole Conversion Rate']}%`);
+
+            const story = peakStories.find(s => s.season === peak.Season);
+            if (story) {
+                storiesContainer.append("div")
+                    .attr("class", "peak-story-box")
+                    .attr("id", `story-${peak.Season}`)
+                    .html(story.content);
+            }
+        });
+        
+        // Find highest and lowest points for annotations
+        const highest = data.reduce((max, d) => d['Pole Conversion Rate'] > max['Pole Conversion Rate'] ? d : max, data[0]);
+        const lowest = data.reduce((min, d) => d['Pole Conversion Rate'] < min['Pole Conversion Rate'] ? d : min, data[0]);
+
+        const annotations = svg.append("g").attr("class", "static-annotations");
+
+        const annotationData = [
+            { season: highest.Season, text: `Highest Rate: ${highest['Pole Conversion Rate']}%`, dy: -15 },
+            { season: lowest.Season, text: `Lowest Rate: ${lowest['Pole Conversion Rate']}%`, dy: 15 }
+        ];
+
+        annotationData.forEach(ann => {
+            const dataPoint = data.find(d => d.Season === ann.season);
+            if (dataPoint) {
+                const xPos = x(dataPoint.Season);
+                const yPos = y(dataPoint['Pole Conversion Rate']);
+                annotations.append("line")
+                    .attr("x1", xPos).attr("y1", yPos)
+                    .attr("x2", xPos).attr("y2", yPos + ann.dy)
+                    .style("stroke", "#555")
+                    .style("stroke-dasharray", "2,2");
+                annotations.append("text")
+                    .attr("x", xPos)
+                    .attr("y", yPos + ann.dy + (ann.dy > 0 ? 15 : -5))
+                    .attr("text-anchor", "middle")
+                    .style("font-size", "0.8rem")
+                    .style("fill", "#ddd")
+                    .text(ann.text);
+            }
+        });
+        
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "line-chart-tooltip");
+    }
+    
+    let currentPeakIndex = -1;
+    let interactionStarted = false;
+    const peaks = seasonPoleData.filter(d => d['Pole Conversion Rate'] > 60);
+    const interactiveFooter = document.getElementById('chart-interactive-footer');
+    const initialTitle = document.getElementById('chart-initial-title');
+    const chartElement = document.getElementById('seasonChart');
+    const scrollyTextBox = document.getElementById('scrolly-text-container');
+    const chartOverlay = document.getElementById('chart-overlay');
+
+    const scrollWrapper = document.querySelector('.season-chart-scroll-wrapper');
+    
+    function handleChartInteractionScroll() {
+        const rect = scrollWrapper.getBoundingClientRect();
+        const progress = -rect.top / (rect.height - window.innerHeight);
+
+        if (progress < 0.33) { // Stage 1: Static chart
+            chartElement.classList.remove('scaled-down');
+            initialTitle.classList.remove('hidden');
+            interactiveFooter.classList.remove('visible');
+            scrollyTextBox.style.opacity = 0;
+            chartOverlay.style.opacity = 0;
+            d3.select(".static-annotations").style("display", "block");
+            d3.select(".tooltip-circles").style("display", "block");
+            d3.selectAll(".peak-highlighter, .peak-percentage-label, .peak-story-box").classed("active visible", false);
+        } else if (progress >= 0.33 && progress < 0.66) { // Stage 2: Scrolly text
+            chartElement.classList.remove('scaled-down');
+            initialTitle.classList.remove('hidden');
+            interactiveFooter.classList.remove('visible');
+            d3.select(".static-annotations").style("display", "block");
+            d3.select(".tooltip-circles").style("display", "block");
+            d3.selectAll(".peak-highlighter, .peak-percentage-label, .peak-story-box").classed("active visible", false);
+            
+            const textProgress = (progress - 0.33) / 0.33;
+            const opacity = Math.sin(textProgress * Math.PI);
+            scrollyTextBox.style.opacity = opacity;
+            chartOverlay.style.opacity = opacity * 0.8;
+
+        } else { // Stage 3: Interactive mode
+            chartElement.classList.add('scaled-down');
+            initialTitle.classList.add('hidden');
+            interactiveFooter.classList.add('visible');
+            scrollyTextBox.style.opacity = 0;
+            chartOverlay.style.opacity = 0;
+            d3.select(".static-annotations").style("display", "none");
+            d3.select(".tooltip-circles").style("display", "none");
+
+            if(!interactionStarted) {
+                interactionStarted = true;
+                currentPeakIndex = 0;
+                updatePeakHighlight();
+            }
+        }
+    }
+
+    window.addEventListener('scroll', handleChartInteractionScroll);
+
+
+    function updatePeakHighlight() {
+        d3.selectAll(".peak-highlighter").classed("active", false);
+        d3.selectAll(".peak-percentage-label").classed("active", false);
+        d3.selectAll(".peak-story-box").classed("visible", false);
+
+        if (currentPeakIndex >= 0 && currentPeakIndex < peaks.length) {
+            const activePeak = peaks[currentPeakIndex];
+            d3.select(`#peak-${activePeak.Season}`).classed("active", true);
+            d3.select(`#peak-label-${activePeak.Season}`).classed("active", true);
+            const storyBox = d3.select(`#story-${activePeak.Season}`);
+            if(!storyBox.empty()){
+               storyBox.classed("visible", true);
+            }
+        }
+    }
+
+    document.getElementById('nextPeakBtn').addEventListener('click', () => {
+        currentPeakIndex = (currentPeakIndex + 1) % peaks.length;
+        updatePeakHighlight();
     });
-  </script>
+    
+    document.getElementById('prevPeakBtn').addEventListener('click', () => {
+        currentPeakIndex = (currentPeakIndex - 1 + peaks.length) % peaks.length;
+        updatePeakHighlight();
+    });
 
+    function drawChart() {
+        createInteractiveSeasonChart(seasonPoleData);
+    }
+
+    drawChart();
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(drawChart, 250);
+    });
+
+    // --- SCRIPT FOR FINAL SEASON SECTION ---
+    function create2025Visuals() {
+        const initialContainer = document.getElementById('initial-2025-lines');
+        const mclarenContainer = document.getElementById('mclaren-era-lines');
+        if (!initialContainer || !mclarenContainer) return;
+
+        const redLines = new Set([1, 3, 5, 8, 9, 10, 11]);
+
+        for (let i = 1; i <= 14; i++) {
+            const initialLine = document.createElement('div');
+            initialLine.className = 'final-line';
+            if (redLines.has(i)) {
+                initialLine.classList.add('red');
+            }
+            initialContainer.appendChild(initialLine);
+
+            const mclarenLine = document.createElement('div');
+            mclarenLine.className = 'final-line';
+             if (redLines.has(i)) {
+                 if(i === 10) {
+                     mclarenLine.style.backgroundColor = '#04BFB6';
+                 } else {
+                     mclarenLine.style.backgroundColor = '#FF8000';
+                 }
+            }
+            mclarenContainer.appendChild(mclarenLine);
+        }
+    }
+    create2025Visuals();
+
+  </script>
 </body>
 </html>
